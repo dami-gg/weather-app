@@ -8,7 +8,11 @@ class App extends React.Component {
     location: '',
     data: {},
     dates: [],
-    temps: []
+    temps: [],
+    selected: {
+      date: '',
+      temp: null
+    }
   };
 
   fetchData = (event) => {
@@ -37,7 +41,11 @@ class App extends React.Component {
       self.setState({
         data: body,
         dates: dates,
-        temps: temps
+        temps: temps,
+        selected: {
+          date: '',
+          temp: null
+        }
       });
     });
   };
@@ -46,6 +54,17 @@ class App extends React.Component {
     this.setState({
       location: event.target.value
     });
+  };
+
+  onPlotClick = (data) => {
+    if(data.points) {
+      this.setState({
+        selected: {
+          date: data.points[0].x,
+          temp: data.points[0].y
+        }
+      });
+    }
   };
 
   render() {
@@ -76,13 +95,21 @@ class App extends React.Component {
         {(this.state.data.list) ? (
             <div className="wrapper">
               <p className="temp-wrapper">
-                <span className="temp">{ currentTemp }</span>
-                <span className="temp-symbol">°C</span>
+                <p>
+                  <span className="temp">
+                    { this.state.selected.temp ? this.state.selected.temp : currentTemp }
+                  </span>
+                  <span className="temp-symbol">°C</span>
+                </p>
+                <p className="temp-date">
+                  { this.state.selected.temp ? this.state.selected.date : '' }
+                </p>
               </p>
               <h2>Forecast</h2>
               <Plot
                   xData={this.state.dates}
                   yData={this.state.temps}
+                  onPlotClick={this.onPlotClick}
                   type="scatter"
               />
             </div>
