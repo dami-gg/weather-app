@@ -1,19 +1,16 @@
 import React from 'react';
 import './App.css';
-import xhr from 'xhr';
 import Plot from './Plot.js';
 import {connect} from 'react-redux';
 import {
     changeLocation,
     setSelectedDate,
     setSelectedTemperature,
-    setData,
-    setDates,
-    setTemperatures
+    fetchData
 } from './actions';
 
 class App extends React.Component {
-  fetchData = (event) => {
+  fetchWeatherInfo = (event) => {
     event.preventDefault();
 
     var location = encodeURIComponent(this.props.location);
@@ -22,27 +19,7 @@ class App extends React.Component {
     var urlSuffix = '&APPID=85fa5281c2772ffb08d84752a4e1181d&units=metric';
     var url = urlPrefix + location + urlSuffix;
 
-    var self = this;
-
-    xhr({
-      url: url
-    }, function (err, data) {
-      var body         = JSON.parse(data.body),
-          list         = body.list,
-          dates        = [],
-          temperatures = [];
-
-      for (var i = 0; i < list.length; i++) {
-        dates.push(list[i].dt_txt);
-        temperatures.push(list[i].main.temp);
-      }
-
-      self.props.dispatch(setData(body));
-      self.props.dispatch(setDates(dates));
-      self.props.dispatch(setTemperatures(temperatures));
-      self.props.dispatch(setSelectedDate(''));
-      self.props.dispatch(setSelectedTemperature(null));
-    });
+    this.props.dispatch(fetchData(url));
   };
 
   changeSearchedLocation = (event) => {
@@ -66,7 +43,7 @@ class App extends React.Component {
         <div>
 
           <h1>Weather</h1>
-          <form onSubmit={this.fetchData}>
+          <form onSubmit={this.fetchWeatherInfo}>
             <label>
               <p>I want to know the weather for</p>
               <input

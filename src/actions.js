@@ -1,3 +1,5 @@
+import xhr from 'xhr';
+
 export function setData(data) {
   return {
     type: 'SET_DATA',
@@ -5,7 +7,7 @@ export function setData(data) {
   }
 }
 
-export function setDates(dates){
+export function setDates(dates) {
   return {
     type: 'SET_DATES',
     dates: dates
@@ -37,6 +39,30 @@ export function setSelectedTemperature(temperature) {
   return {
     type: 'SET_SELECTED_TEMPERATURE',
     temperature: temperature
+  }
+}
+
+export function fetchData(url) {
+  return function thunk(dispatch) {
+    xhr({
+      url: url
+    }, function (err, data) {
+      var body         = JSON.parse(data.body),
+          list         = body.list,
+          dates        = [],
+          temperatures = [];
+
+      for (var i = 0; i < list.length; i++) {
+        dates.push(list[i].dt_txt);
+        temperatures.push(list[i].main.temp);
+      }
+
+      dispatch(setData(body));
+      dispatch(setDates(dates));
+      dispatch(setTemperatures(temperatures));
+      dispatch(setSelectedDate(''));
+      dispatch(setSelectedTemperature(null));
+    });
   }
 }
 
